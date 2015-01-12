@@ -28,14 +28,14 @@ Common use cases
     for key, item in options.iteritems():
         print key, item
 
-notes
------
+notes/todo
+----------
 
-* show long descriptions of settings if requrested (how do we do this in flask?)
+* show long descriptions of settings if requested (how do we do this in flask?)
 * for certain settings we want to restrict possible values to a list of choices
 * Could we implement cross-setting requirements? I.e., if 2D mode is on, then we
   need fictious sink nodes.
-* multiple setting can be stored in a file, only the class names must be unique
+* multiple settings can be stored in a file, only the class names must be unique
 * what about the level merging? If we keep this, we need some way to add and
   remove the settings (or just set them to None?). We have to distinguish
   between settings we do not want to touch at a specific level, and those we
@@ -43,6 +43,19 @@ notes
 
   'None' - no setting
   '*' - use default
+
+Argument description
+--------------------
+
+value : The initial value of the option
+comment: the description
+selection:
+dtype: the type of the option
+instances: types also recognized, wenn be converted to dtype. For example, int
+           can be converted to float, so a dtype=float can convert an instance
+           int types also recognized, wenn be converted to dtype. For example,
+           int can be converted to float, so a dtype=float can convert an
+           instance int.
 
 """
 
@@ -81,11 +94,20 @@ class OptionBase(object):
             self.value = None
         elif isinstance(value, self.instances) or convert:
             try:
-                self.value = self.dtype(value)
+                converted_value = self.dtype(value)
             except ValueError, e:
                 print('There was an error converting the value "{0}"'.format(
                     value))
                 print(e)
+            else:
+                # check against allowed values
+                if self.selection is not None:
+                    if converted_value not in self.selection:
+                        raise Exception(
+                            'Value {0} not in allowed values {1}'.format(
+                                converted_value, self.selection))
+                self.value = converted_value
+
         else:
             raise TypeError('Wrong data type')
 
