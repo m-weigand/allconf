@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+
+    {{ message|safe }}
+
+    <br />
+    <hr />
+    <br />
+   <form method="post" action="/send">
+        {{ form.hidden_tag() }}
+        {% for field, descr in items %}
+            {% if field.id != "csrf_token" %}
+                {{ descr|safe }}
+                {{ field.label }}  {{ field() }} <br />
+            {% endif %}
+        {% endfor %}
+   </form>
+{% endblock %}
