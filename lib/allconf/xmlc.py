@@ -1,5 +1,6 @@
 import os
 import xml.etree.ElementTree as xmlp
+from xml.dom import minidom
 
 
 class xmlio(object):
@@ -9,11 +10,11 @@ class xmlio(object):
         self.target = option_class
         self.target_name = type(self.target).__name__
 
-    def prettify(self, elem):
-        from xml.dom import minidom
+    @staticmethod
+    def prettify(element):
         """Return a pretty-printed XML string for the Element.
         """
-        rough_string = xmlp.tostring(elem, 'utf-8')
+        rough_string = xmlp.tostring(element, 'utf-8')
         reparsed = minidom.parseString(rough_string)
         pretty_string = reparsed.toprettyxml(indent="  ", encoding='utf-8')
         # remove empty lines
