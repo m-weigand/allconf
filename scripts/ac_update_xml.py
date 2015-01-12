@@ -3,9 +3,14 @@
 """
 Given a reference and one or more target xml files, replace the specified tags
 of the target files with those from the reference file.
+
+WARNING: At the moment some comments will be lost when using this script!
 """
 import os
+import copy
 from optparse import OptionParser
+import xml.etree.ElementTree as xmlp
+from allconf.xmlc import xmlio
 
 
 def handle_cmd_options():
@@ -40,8 +45,48 @@ def handle_cmd_options():
         print('You must specify a reference file')
         exit()
 
-    return options
+    return options, targets
+
+
+def update_xml_files(reffile, target_files, tags):
+    # read reference file
+    reftree = xmlp.ElementTree()
+    reftree.parse(reffile)
+
+    # read targets
+    targettrees = []
+    for filename in target_files:
+        ttree = xmlp.ElementTree()
+        ttree.parse(filename)
+        targettrees.append(ttree)
+
+    # now replace or insert each tag
+    for index, ttree in enumerate(targettrees):
+        print target_files[index]
+
+        for tag in tags:
+            # find ref tag
+            reftag = reftree.getroot().find(tag)
+            if reftag is None:
+                raise Exception('Tag not round in reference: {0}'.format(tag))
+
+            # find target tag
+            ttag = ttree.getroot().find(tag)
+            if ttag is not None:
+                ttree.getroot().remove(ttag)
+
+            # make a copy of the ref element
+            copy_reftag = copy.deepcopy(reftag)
+
+            ttree.getroot().append(copy_reftag)
+
+    # save to file
+    for filename, ttree in zip(target_files, targettrees):
+        tree_string = xmlio.prettify(ttree.getroot())
+        with open(filename, 'w') as fid:
+            fid.write(tree_string)
 
 
 if __name__ == '__main__':
     options, targets = handle_cmd_options()
+    update_xml_files(options.reference, targets, options.tags.split(';'))
