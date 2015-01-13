@@ -14,12 +14,13 @@ class xmlio(object):
     def prettify(element):
         """Return a pretty-printed XML string for the Element.
         """
-        rough_string = xmlp.tostring(element, 'utf-8')
+        rough_string = xmlp.tostring(element, encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
         pretty_string = reparsed.toprettyxml(indent="  ", encoding='utf-8')
+        pretty_str_utf8 = unicode(pretty_string, encoding='utf-8')
         # remove empty lines
         ps_no_empty_lines = u'\n'.join(
-            [x for x in pretty_string.splitlines() if x.strip() != ''])
+            [x for x in pretty_str_utf8.splitlines() if x.strip() != u''])
 
         return ps_no_empty_lines
 
