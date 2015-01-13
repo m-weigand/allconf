@@ -7,6 +7,7 @@ of the target files with those from the reference file.
 WARNING: At the moment some comments will be lost when using this script!
 """
 import os
+import io
 import copy
 from optparse import OptionParser
 import xml.etree.ElementTree as xmlp
@@ -53,6 +54,7 @@ def update_xml_files(reffile, target_files, tags):
     reftree = xmlp.ElementTree()
     reftree.parse(reffile)
 
+    print('Reading target xml files')
     # read targets
     targettrees = []
     for filename in target_files:
@@ -60,6 +62,7 @@ def update_xml_files(reffile, target_files, tags):
         ttree.parse(filename)
         targettrees.append(ttree)
 
+    print('Updating settings')
     # now replace or insert each tag
     for index, ttree in enumerate(targettrees):
         print target_files[index]
@@ -80,10 +83,12 @@ def update_xml_files(reffile, target_files, tags):
 
             ttree.getroot().append(copy_reftag)
 
+    print('Saving files')
     # save to file
     for filename, ttree in zip(target_files, targettrees):
+        print(filename)
         tree_string = xmlio.prettify(ttree.getroot())
-        with open(filename, 'w') as fid:
+        with io.open(filename, 'w', encoding='utf-8') as fid:
             fid.write(tree_string)
 
 
